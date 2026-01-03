@@ -1,0 +1,1870 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+<title>Tic Tac Toe³</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>❌</text></svg>">
+
+<script src="https://unpkg.com/peerjs@1.5.2/dist/peerjs.min.js"></script>
+
+<link href="https://fonts.googleapis.com/css2?family=Libre+Franklin:wght@400;500;600&family=Playfair+Display:wght@700;900&display=swap" rel="stylesheet" />
+
+<style>
+  :root {
+    /* LIGHT THEME (Default) */
+    --bg-color: #fbfbfb;
+    --board-bg: #ffffff;
+    --nyt-black: #121212;
+    --highlight-blue: #a7d8ff;
+    --legal-move-gold: #fff9c4; 
+    --dimmed-cell: #fcfcfc;
+    --line-thin: #e6e6e6;
+    --line-med: #888;
+    --line-thick: #000;
+    --text-subtle: #666;
+    --btn-hover: #f0f0f0;
+    
+    /* Font Variables */
+    --font-title: 'Playfair Display', serif;
+    --font-ui: 'Libre Franklin', sans-serif;
+    
+    /* Glows (Default none) */
+    --glow-text: none;
+    --glow-box: none;
+
+    /* Chat Bubble Colors (Light Mode) */
+    --chat-bg-x: #ffdede; /* Very Muted Red */
+    --chat-bg-o: #deeeff; /* Very Muted Blue */
+    --chat-text: #121212;
+
+    /* Gradient placeholders */
+    --gradient-btn: var(--nyt-black);
+  }
+
+  /* DARK THEME OVERRIDES */
+  body.dark-theme {
+    --bg-color: #121212;
+    --board-bg: #1e1e1e;
+    --nyt-black: #e0e0e0;
+    --highlight-blue: #2a4b70;
+    --legal-move-gold: #4a4a4a; 
+    --dimmed-cell: #252525;
+    --line-thin: #333;
+    --line-med: #555;
+    --line-thick: #e0e0e0;
+    --text-subtle: #aaa;
+    --btn-hover: #333;
+
+    /* Chat Bubble Colors (Dark Mode) */
+    --chat-bg-x: #4a2b2b; /* Dark Muted Red */
+    --chat-bg-o: #2b3a4a; /* Dark Muted Blue */
+    --chat-text: #e0e0e0;
+  }
+
+  /* STRANGER THINGS THEME */
+  body.stranger-theme {
+    --bg-color: #080000;
+    --board-bg: #000000;
+    --nyt-black: #ff1e1e; 
+    --highlight-blue: #222; 
+    --legal-move-gold: #450a0a; 
+    --dimmed-cell: #110000;
+    --line-thin: #550000;
+    --line-med: #aa0000;
+    --line-thick: #ff0000;
+    --text-subtle: #990000;
+    --btn-hover: #1a0000;
+    
+    --glow-text: 0 0 8px rgba(255, 30, 30, 0.6);
+    --glow-box: 0 0 15px rgba(255, 0, 0, 0.4);
+
+    --chat-bg-x: #400000; 
+    --chat-bg-o: #222; 
+    --chat-text: #ff1e1e;
+  }
+
+  /* SHOWGIRL THEME */
+  body.showgirl-theme {
+    --bg-color: #fff0e0; 
+    --board-bg: #fffbf0;
+    --nyt-black: #e65100; 
+    --highlight-blue: #00c897; 
+    --legal-move-gold: #ffe0b2; 
+    --dimmed-cell: #fff8ec;
+    --line-thin: #ffcc80;
+    --line-med: #ff9800;
+    --line-thick: #e65100;
+    --text-subtle: #bf360c;
+    --btn-hover: #ffe0b2;
+    
+    --glow-text: 0 0 5px rgba(255, 160, 0, 0.4);
+    --glow-box: 0 0 12px rgba(255, 160, 0, 0.3);
+
+    --chat-bg-x: #c8ffe8; 
+    --chat-bg-o: #ffe0b2; 
+    --chat-text: #e65100;
+  }
+  
+  body.showgirl-theme #board,
+  body.showgirl-theme .screen,
+  body.showgirl-theme #sidebar,
+  body.showgirl-theme #chat-sidebar {
+      background: var(--board-bg); 
+  }
+
+  /* NEWSPAPER THEME */
+  body.newspaper-theme {
+    --bg-color: #f4f1ea; 
+    --board-bg: #ffffff;
+    --nyt-black: #111111; 
+    --highlight-blue: #888;
+    --legal-move-gold: #dcdcdc; 
+    --dimmed-cell: #f4f1ea;
+    --line-thin: #ccc;
+    --line-med: #666;
+    --line-thick: #000;
+    --text-subtle: #444;
+    --btn-hover: #e0e0e0;
+    
+    --chat-bg-x: #e5e5e5;
+    --chat-bg-o: #d4d4d4;
+    --chat-text: #000;
+
+    font-family: 'Playfair Display', serif; 
+  }
+  body.newspaper-theme button { font-family: 'Playfair Display', serif; }
+
+  /* RAINBOW THEME */
+  body.rainbow-theme {
+    /* VIBRANT, MODERN GRADIENT */
+    background: linear-gradient(
+      -45deg, 
+      #ff5e6c, #ff9f43, #feca57, #2ed573, #54a0ff, #a55eea
+    );
+    background-size: 400% 400%;
+    animation: rainbowBG 30s ease infinite;
+
+    --board-bg: rgba(255, 255, 255, 0.94); 
+    --nyt-black: #555; 
+    --highlight-blue: #a1c4fd;
+    --legal-move-gold: #fff9c4; 
+    --dimmed-cell: rgba(255, 255, 255, 0.5);
+    --line-thin: #e0e0e0; 
+    --line-med: #bbb; 
+    --line-thick: #555; 
+    --text-subtle: #777;
+    --btn-hover: #f0f0f0;
+    
+    --glow-text: none;
+    --glow-box: 0 10px 25px rgba(186, 225, 255, 0.4); 
+
+    --gradient-btn: linear-gradient(to right, #ff5e6c, #feca57, #2ed573, #54a0ff);
+
+    --chat-bg-x: #ffd1d6; 
+    --chat-bg-o: #d1e8ff; 
+    --chat-text: #444;
+  }
+
+  @keyframes rainbowBG {
+    0% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
+  }
+
+  body {
+    margin: 0;
+    height: 100vh;
+    background: var(--bg-color);
+    font-family: var(--font-ui); 
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    color: var(--nyt-black);
+    overflow: hidden; 
+    transition: background 0.3s, color 0.3s;
+  }
+
+  /* ---------------- BUTTONS ---------------- */
+  .pill-btn {
+    background: var(--nyt-black); 
+    color: var(--bg-color);
+    padding: 16px 40px;
+    border: none;
+    border-radius: 40px;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    font-family: var(--font-ui);
+    transition: transform 0.2s, box-shadow 0.2s, background 0.3s;
+    min-width: 200px;
+    box-shadow: var(--glow-box);
+    position: relative; z-index: 1;
+  }
+  .pill-btn:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(0,0,0,0.15); }
+  
+  body.rainbow-theme .pill-btn {
+    background: var(--gradient-btn);
+    color: #fff;
+    text-shadow: 0 1px 2px rgba(0,0,0,0.2);
+    box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+  }
+  
+  body.newspaper-theme .pill-btn {
+    background: #000;
+    color: #fff;
+    border: 1px solid #000;
+    box-shadow: 4px 4px 0px rgba(0,0,0,0.2); 
+  }
+  body.newspaper-theme .pill-btn:hover {
+    transform: translate(-1px, -1px);
+    box-shadow: 6px 6px 0px rgba(0,0,0,0.25);
+  }
+
+  .secondary-btn {
+    background: transparent;
+    color: var(--nyt-black);
+    border: 2px solid var(--line-med);
+    box-shadow: none; 
+  }
+  .secondary-btn:hover { background: var(--btn-hover); transform: translateY(-2px); border-color: var(--nyt-black); }
+  body.rainbow-theme .secondary-btn:hover { background: rgba(255,255,255,0.7); }
+
+  .action-btn {
+    width: 100%;
+    padding: 10px;
+    margin-top: 8px;
+    border: 1px solid var(--line-med);
+    background: var(--board-bg);
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: var(--nyt-black);
+    transition: all 0.2s;
+    font-family: var(--font-ui);
+  }
+  .action-btn:hover { background: var(--btn-hover); border-color: var(--nyt-black); }
+  .danger-btn:hover { background: #500; color: white; border-color: #d93a3a; }
+
+  /* ---------------- SCREENS ---------------- */
+  .screen {
+    position: absolute; inset: 0;
+    background: var(--bg-color);
+    display: flex; flex-direction: column; justify-content: center; align-items: center;
+    z-index: 100; transition: opacity 0.4s ease;
+  }
+  body.rainbow-theme .screen { background: transparent; }
+  .hidden { opacity: 0; pointer-events: none; z-index: -1; }
+
+  #title { font-family: var(--font-title); font-size: 5rem; font-weight: 900; color: var(--nyt-black); letter-spacing: -0.03em; margin-bottom: 10px; text-shadow: var(--glow-text); }
+  #title sup { font-family: var(--font-title); font-size: 2rem; font-weight: 900; top: -2.5rem; position: relative; color: var(--nyt-black); text-shadow: var(--glow-text); }
+
+  #mode-screen h2, #settings-screen h2, #themes-screen h2, #friend-select-screen h2, #online-lobby-screen h2, #name-input-screen h2, #side-select-screen h2 { 
+    font-family: var(--font-title); font-size: 3rem; margin-bottom: 40px; text-shadow: var(--glow-text);
+  }
+  .mode-options { display: flex; flex-direction: column; gap: 15px; align-items: center; }
+
+  /* ---------------- SETTINGS & THEMES ---------------- */
+  .settings-group { margin-bottom: 30px; text-align: center; }
+  .settings-label { font-weight: 700; text-transform: uppercase; font-size: 0.8rem; letter-spacing: 1px; color: var(--text-subtle); margin-bottom: 15px; display: block; text-shadow: var(--glow-text); }
+  .option-row { display: flex; gap: 10px; justify-content: center; margin-bottom: 10px; }
+
+  .select-btn {
+    background: var(--board-bg); border: 1px solid var(--line-med); color: var(--nyt-black);
+    padding: 12px 24px; border-radius: 8px; cursor: pointer; font-family: var(--font-ui);
+    font-weight: 600; transition: all 0.2s; min-width: 80px;
+  }
+  .select-btn:hover { border-color: var(--nyt-black); }
+  .select-btn.selected { background: var(--nyt-black); color: var(--bg-color); border-color: var(--nyt-black); box-shadow: 0 4px 12px rgba(0,0,0,0.15); }
+  
+  #btn-side-x.selected { background: #d93a3a; border-color: #d93a3a; color: white; }
+  #btn-side-o.selected { background: #3a7bd9; border-color: #3a7bd9; color: white; }
+  
+  body.showgirl-theme #btn-side-x.selected { background: #00c897; border-color: #00c897; } 
+  body.showgirl-theme #btn-side-o.selected { background: #ff9100; border-color: #ff9100; }
+  body.rainbow-theme .select-btn.selected { background: var(--gradient-btn); color: #fff; border: none; }
+  body.rainbow-theme #btn-side-x.selected { background: #d93a3a; color: white; }
+  body.rainbow-theme #btn-side-o.selected { background: #3a7bd9; color: white; }
+  body.newspaper-theme .select-btn.selected { background: #000; color: #fff; box-shadow: 3px 3px 0 rgba(0,0,0,0.3); }
+
+  /* ---------------- INPUTS ---------------- */
+  input[type="text"] {
+    padding: 12px 20px;
+    font-size: 1rem;
+    border: 1px solid var(--line-med);
+    border-radius: 8px;
+    background: var(--board-bg);
+    color: var(--nyt-black);
+    font-family: var(--font-ui);
+    outline: none;
+    transition: border-color 0.2s;
+  }
+  input[type="text"]:focus { border-color: var(--nyt-black); }
+
+  /* ---------------- MODALS ---------------- */
+  .modal-overlay {
+    position: absolute; inset: 0;
+    background: rgba(255,255,255,0.9); backdrop-filter: blur(5px);
+    z-index: 2000; display: flex; flex-direction: column; justify-content: center; align-items: center;
+    opacity: 0; pointer-events: none; transition: opacity 0.3s;
+  }
+  body.dark-theme .modal-overlay, body.stranger-theme .modal-overlay { background: rgba(0,0,0,0.9); }
+  body.showgirl-theme .modal-overlay { background: rgba(255, 243, 224, 0.95); }
+  body.rainbow-theme .modal-overlay { background: rgba(255, 255, 255, 0.85); }
+  body.newspaper-theme .modal-overlay { background: rgba(244, 241, 234, 0.95); }
+  .modal-overlay.active { opacity: 1; pointer-events: auto; }
+
+  /* PAUSE OVERLAY: SPECIFIC TO BOARD NOW */
+  .board-overlay {
+    position: absolute; inset: 0; 
+    background: rgba(255,255,255,0.8); backdrop-filter: blur(3px);
+    z-index: 1000; display: flex; flex-direction: column; justify-content: center; align-items: center;
+    opacity: 0; pointer-events: none; transition: opacity 0.3s;
+  }
+  .board-overlay.active { opacity: 1; pointer-events: auto; }
+  
+  body.dark-theme .board-overlay { background: rgba(0,0,0,0.8); }
+  body.stranger-theme .board-overlay { background: rgba(0,0,0,0.85); }
+
+  #win-title { font-family: var(--font-title); font-size: 6rem; font-weight: 900; margin-bottom: 20px; text-shadow: var(--glow-text); }
+  
+  .big-pause-icon { width: 80px; height: 80px; display: flex; justify-content: center; align-items: center; margin-bottom: 10px; color: var(--nyt-black); filter: drop-shadow(var(--glow-text)); }
+  .big-pause-icon::after { content: ''; display: block; width: 15px; height: 50px; background-color: currentColor; box-shadow: 25px 0 0 0 currentColor; transform: translateX(-12px); }
+  #paused-time { font-family: var(--font-ui); font-size: 2.5rem; font-weight: 600; margin-top: 10px; font-variant-numeric: tabular-nums; color: var(--nyt-black); text-shadow: var(--glow-text); }
+
+  /* ---------------- GAME LAYOUT (3 Columns) ---------------- */
+  #game-wrapper { 
+    display: flex; gap: 25px; align-items: flex-start; padding-top: 20px; 
+    opacity: 0; transition: opacity 0.6s ease; 
+    width: 100%; justify-content: center;
+  }
+  
+  /* Board in Center */
+  #board-container { position: relative; width: 85vmin; height: 85vmin; max-width: 700px; max-height: 700px; flex-shrink: 0; }
+  
+  #board {
+    width: 100%; height: 100%; display: grid;
+    grid-template-columns: repeat(27, 1fr); grid-template-rows: repeat(27, 1fr);
+    background: var(--board-bg); border: 4px solid var(--nyt-black); box-sizing: border-box;
+    transition: background 0.3s, border-color 0.3s;
+    box-shadow: var(--glow-box); 
+  }
+  
+  .cell {
+    border-right: 1px solid var(--line-thin); border-bottom: 1px solid var(--line-thin);
+    font-family: var(--font-ui); font-size: calc(85vmin / 27 * 0.6);
+    font-weight: 600; display: flex; justify-content: center; align-items: center;
+    cursor: pointer; user-select: none; transition: background 0.1s; color: var(--nyt-black); box-sizing: border-box;
+  }
+  @media (min-width: 800px) { .cell { font-size: 1.2rem; } }
+
+  .cell.b-right-med { border-right: 1px solid var(--line-med); }
+  .cell.b-bottom-med { border-bottom: 1px solid var(--line-med); }
+  .cell.b-right-thick { border-right: 3px solid var(--line-thick); }
+  .cell.b-bottom-thick { border-bottom: 3px solid var(--line-thick); }
+  .cell[data-col="26"] { border-right: none !important; }
+  .cell[data-row="26"] { border-bottom: none !important; }
+
+  .cell.legal-zone { background: var(--legal-move-gold); }
+  .cell.legal-zone:hover { filter: brightness(0.95); }
+  body.dark-theme .cell.legal-zone:hover { filter: brightness(1.2); }
+  
+  .cell.disabled-zone { background: var(--dimmed-cell); cursor: default; }
+  
+  .cell.x-mark { color: #d93a3a; text-shadow: var(--glow-text); }
+  .cell.o-mark { color: #3a7bd9; text-shadow: var(--glow-text); }
+  
+  body.stranger-theme .cell.x-mark { color: #ff0000; }
+  body.stranger-theme .cell.o-mark { color: #ffffff; text-shadow: 0 0 5px white; }
+  body.showgirl-theme .cell.x-mark { color: #00c897; }
+  body.showgirl-theme .cell.o-mark { color: #ff9100; }
+  body.newspaper-theme .cell.x-mark { color: #000; text-shadow: none; }
+  body.newspaper-theme .cell.o-mark { color: #000; text-shadow: none; }
+  body.rainbow-theme .cell.x-mark { color: #d93a3a; text-shadow: none; }
+  body.rainbow-theme .cell.o-mark { color: #3a7bd9; text-shadow: none; }
+  
+  .label-strip { position: absolute; display: grid; font-size: 0.65rem; color: var(--text-subtle); font-weight: 500; pointer-events: none; }
+  #col-labels { top: -20px; left: 0; width: 100%; height: 20px; grid-template-columns: repeat(27, 1fr); align-items: end; justify-items: center; padding-bottom: 4px; box-sizing: border-box; }
+  #row-labels { left: -25px; top: 0; height: 100%; width: 25px; grid-template-rows: repeat(27, 1fr); align-items: center; justify-items: end; padding-right: 6px; box-sizing: border-box; }
+
+  /* --- OVERLAY FIXES --- */
+  .won-overlay {
+    position: absolute; display: flex; justify-content: center; align-items: center;
+    font-family: var(--font-title); font-weight: 900;
+    animation: popIn 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); pointer-events: none;
+    box-sizing: border-box; transform-origin: center;
+  }
+
+  .won-middle-grid { 
+      font-size: 3rem; z-index: 10; 
+      background: rgba(255, 255, 255, 0.6); 
+      border: none; box-shadow: none; transform: scale(0.9);
+  }
+  body.dark-theme .won-middle-grid { background: rgba(30, 30, 30, 0.6); }
+  body.stranger-theme .won-middle-grid { background: rgba(0, 0, 0, 0.6); }
+  body.showgirl-theme .won-middle-grid { background: rgba(255, 243, 224, 0.6); }
+  body.rainbow-theme .won-middle-grid { background: rgba(255, 255, 255, 0.5); }
+  body.newspaper-theme .won-middle-grid { background: rgba(255, 255, 255, 0.8); border: 2px solid #000; }
+  
+  .won-big-grid { 
+      font-size: 10rem; z-index: 20; 
+      background: rgba(255, 255, 255, 0.6); 
+      border: none; transform: scale(0.9);
+  }
+  body.dark-theme .won-big-grid { background: rgba(20, 20, 20, 0.6); }
+  body.stranger-theme .won-big-grid { background: rgba(20, 20, 20, 0.6); }
+  body.showgirl-theme .won-big-grid { background: rgba(255, 243, 224, 0.6); }
+  body.rainbow-theme .won-big-grid { background: rgba(255, 255, 255, 0.5); }
+  body.newspaper-theme .won-big-grid { background: rgba(255, 255, 255, 0.9); border: 4px solid #000; }
+
+  .winner-X { color: #d93a3a; text-shadow: var(--glow-text); }
+  .winner-O { color: #3a7bd9; text-shadow: var(--glow-text); }
+  body.stranger-theme .winner-X { color: #ff0000; }
+  body.stranger-theme .winner-O { color: #fff; }
+  body.showgirl-theme .winner-X { color: #00c897; }
+  body.showgirl-theme .winner-O { color: #ff9100; }
+  body.newspaper-theme .winner-X { color: #000; text-shadow: none; }
+  body.newspaper-theme .winner-O { color: #000; text-shadow: none; }
+  body.rainbow-theme .winner-X { color: #d93a3a; text-shadow: 0 0 5px white; }
+  body.rainbow-theme .winner-O { color: #3a7bd9; text-shadow: 0 0 5px white; }
+
+  @keyframes popIn { from { transform: scale(0.5); opacity: 0; } to { transform: scale(0.9); opacity: 1; } }
+
+  /* ---------------- SIDEBARS ---------------- */
+  #sidebar, #chat-sidebar {
+    width: 260px; height: 85vmin; max-height: 700px;
+    padding: 20px; box-sizing: border-box;
+    background: var(--board-bg); border: 1px solid var(--line-med);
+    display: flex; flex-direction: column; align-items: center;
+    position: relative;
+    transition: background 0.3s;
+    box-shadow: var(--glow-box);
+    flex-shrink: 0;
+  }
+  
+  /* Left Sidebar (Chat) */
+  #chat-sidebar {
+    padding: 0; /* Reset padding for chat layout */
+    display: none; /* Hidden unless online */
+  }
+
+  /* Info Sidebar (Right) specific adjustments if needed */
+  #turn-display-container { width: 100%; border-bottom: 1px solid var(--line-thin); padding-bottom: 20px; text-align: center; margin-bottom: 10px; }
+  .label-text { font-size: 0.75rem; text-transform: uppercase; letter-spacing: 1px; font-weight: 700; color: var(--text-subtle); margin-bottom: 10px; text-shadow: var(--glow-text); }
+  #big-mark { font-family: var(--font-title); font-size: 5rem; line-height: 1; font-weight: 900; text-shadow: var(--glow-text); }
+  .turn-x #big-mark { color: #d93a3a; }
+  .turn-o #big-mark { color: #3a7bd9; }
+  
+  body.stranger-theme .turn-x #big-mark { color: #ff0000; }
+  body.stranger-theme .turn-o #big-mark { color: #fff; }
+  body.showgirl-theme .turn-x #big-mark { color: #00c897; }
+  body.showgirl-theme .turn-o #big-mark { color: #ff9100; }
+  body.newspaper-theme .turn-x #big-mark { color: #000; }
+  body.newspaper-theme .turn-o #big-mark { color: #000; }
+  body.rainbow-theme .turn-x #big-mark { color: #d93a3a; }
+  body.rainbow-theme .turn-o #big-mark { color: #3a7bd9; }
+
+  #timer-container { width: 100%; display: flex; flex-direction: column; align-items: center; margin-bottom: 20px; padding-bottom: 20px; border-bottom: 1px solid var(--line-thin); }
+  .timer-row { display: flex; justify-content: center; align-items: center; gap: 12px; }
+  #timer-display { font-family: var(--font-ui); font-variant-numeric: tabular-nums; font-size: 1.2rem; font-weight: 600; color: var(--nyt-black); text-shadow: var(--glow-text); }
+  
+  .control-btn {
+    background: var(--board-bg); border: 1px solid var(--line-med); width: 32px; height: 32px;
+    border-radius: 50%; display: flex; justify-content: center; align-items: center;
+    cursor: pointer; color: var(--nyt-black); transition: all 0.2s; user-select: none;
+    position: relative; font-size: 1.2rem; line-height: 1; z-index: 2;
+  }
+  .control-btn:hover { background: var(--nyt-black); color: var(--bg-color); border-color: var(--nyt-black); }
+  #pause-btn::after { content: ''; display: block; width: 4px; height: 12px; background-color: currentColor; box-shadow: 6px 0 0 0 currentColor; transform: translateX(-3px); }
+
+  #log-wrapper { width: 100%; flex-grow: 1; overflow: hidden; display: flex; flex-direction: column; margin-bottom: 20px; }
+  #activity-log { width: 100%; overflow-y: auto; padding-right: 4px; scrollbar-width: thin; scrollbar-color: var(--line-med) transparent; }
+  #activity-log::-webkit-scrollbar { width: 4px; }
+  #activity-log::-webkit-scrollbar-thumb { background-color: var(--line-med); border-radius: 4px; }
+  
+  .log-entry { font-size: 0.85rem; color: var(--text-subtle); padding: 8px 0; border-bottom: 1px solid var(--line-thin); animation: slideIn 0.3s ease; display: flex; align-items: center; gap: 8px; text-shadow: var(--glow-text); }
+  @keyframes slideIn { from { opacity: 0; transform: translateY(-5px); } to { opacity: 1; transform: translateY(0); } }
+  .log-mark { font-weight: 800; font-family: var(--font-title); font-size: 0.9rem; }
+  .log-x { color: #d93a3a; }
+  .log-o { color: #3a7bd9; }
+  
+  body.stranger-theme .log-x { color: #ff0000; }
+  body.stranger-theme .log-o { color: #fff; }
+  body.showgirl-theme .log-x { color: #00c897; }
+  body.showgirl-theme .log-o { color: #ff9100; }
+  body.newspaper-theme .log-x { color: #000; }
+  body.newspaper-theme .log-o { color: #000; }
+  body.rainbow-theme .log-x { color: #d93a3a; }
+  body.rainbow-theme .log-o { color: #3a7bd9; }
+
+  #sidebar-actions { width: 100%; display: flex; flex-direction: column; gap: 0; margin-top: auto; align-items: center; }
+  #bottom-controls { width: 100%; display: flex; justify-content: center; gap: 10px; margin-bottom: 10px; }
+
+  /* ---------------- CHAT STYLES ---------------- */
+  #chat-header-bar {
+    padding: 15px; border-bottom: 1px solid var(--line-thin);
+    text-align: center; width: 100%; box-sizing: border-box;
+  }
+  #chat-messages-area {
+    flex-grow: 1; overflow-y: auto; padding: 15px; width: 100%; box-sizing: border-box;
+    display: flex; flex-direction: column; gap: 8px;
+    font-size: 0.9rem;
+    scrollbar-width: thin;
+  }
+  .chat-msg { padding: 8px 12px; border-radius: 8px; max-width: 90%; word-wrap: break-word; font-size: 0.85rem; }
+  
+  /* FORCE OVERRIDE: Specific selectors to ensure color applies */
+  .chat-msg.mine.msg-x, .chat-msg.theirs.msg-x { background: var(--chat-bg-x); color: var(--chat-text); }
+  .chat-msg.mine.msg-o, .chat-msg.theirs.msg-o { background: var(--chat-bg-o); color: var(--chat-text); }
+  
+  /* Fallback if no side assigned yet */
+  .chat-msg.mine { background: var(--highlight-blue); }
+  .chat-msg.theirs { background: var(--btn-hover); }
+
+  /* Alignment based on Sender */
+  .chat-msg.mine { align-self: flex-end; }
+  .chat-msg.theirs { align-self: flex-start; }
+  
+  /* SYSTEM MESSAGE STYLE */
+  .chat-msg.system {
+    align-self: center; background: transparent !important; color: var(--text-subtle) !important;
+    font-style: italic; font-size: 0.8rem; text-align: center; padding: 4px 0; border: none;
+  }
+
+  .chat-name { font-size: 0.7rem; font-weight: 700; margin-bottom: 2px; opacity: 0.7; }
+  
+  /* FIXED: Chat Input Bar to prevent button overflow */
+  #chat-input-bar {
+    padding: 10px; border-top: 1px solid var(--line-thin);
+    display: flex; gap: 5px; width: 100%; box-sizing: border-box;
+  }
+  #chat-input {
+    flex: 1 1 auto; /* Allow grow and shrink */
+    min-width: 0; /* Prevent overflow */
+    padding: 8px; border: 1px solid var(--line-med); border-radius: 4px;
+    background: var(--bg-color); color: var(--nyt-black); font-size: 0.9rem;
+  }
+  #chat-send { 
+    flex: 0 0 auto; /* Don't shrink */
+    background: var(--nyt-black); color: var(--bg-color); border: none; 
+    padding: 0 12px; border-radius: 4px; cursor: pointer; 
+  }
+  
+  .theme-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; width: 100%; max-width: 350px; margin-bottom: 20px; }
+</style>
+</head>
+<body>
+
+<div id="start-screen" class="screen">
+  <div id="title">Tic Tac Toe<sup>3</sup></div>
+  <button id="main-play-btn" class="pill-btn">Play</button>
+</div>
+
+<div id="mode-screen" class="screen hidden">
+  <h2>Select Mode</h2>
+  <div class="mode-options">
+    <button id="friend-mode-btn" class="pill-btn">Multiplayer</button>
+    <button id="computer-mode-btn" class="pill-btn">Play Computer</button>
+    <button id="themes-menu-btn" class="pill-btn secondary-btn" style="padding:10px 30px; font-size:0.9rem;">Themes</button>
+  </div>
+</div>
+
+<div id="friend-select-screen" class="screen hidden">
+  <h2>Multiplayer</h2>
+  <div class="mode-options">
+    <button id="local-friend-btn" class="pill-btn">Same Device</button>
+    <button id="online-friend-btn" class="pill-btn">Invite a Player</button>
+    <button id="friend-back-btn" class="pill-btn secondary-btn" style="margin-top:20px;">Back</button>
+  </div>
+</div>
+
+<div id="name-input-screen" class="screen hidden">
+  <h2>Enter Name</h2>
+  <input type="text" id="player-name-input" placeholder="Your Name" maxlength="12" style="margin-bottom: 20px; text-align: center;">
+  <button id="confirm-name-btn" class="pill-btn">Continue</button>
+  <button id="name-back-btn" class="pill-btn secondary-btn" style="margin-top: 10px;">Back</button>
+</div>
+
+<div id="side-select-screen" class="screen hidden">
+  <h2>Play as...</h2>
+  <div class="mode-options">
+    <button id="host-pick-x" class="pill-btn" style="background: #d93a3a; color: white;">Play as X</button>
+    <button id="host-pick-o" class="pill-btn" style="background: #3a7bd9; color: white;">Play as O</button>
+  </div>
+  <button id="side-back-btn" class="pill-btn secondary-btn" style="margin-top: 20px;">Back</button>
+</div>
+
+<div id="online-lobby-screen" class="screen hidden">
+  <h2>Game link:</h2>
+  <div style="display:flex; gap:10px; margin-bottom:30px; width: 80%; max-width: 400px;">
+    <input type="text" id="invite-link" readonly style="flex-grow:1; padding:10px; border-radius:5px; border:1px solid var(--line-med); font-family:var(--font-ui);" />
+    <button id="copy-link-btn" class="action-btn" style="width:auto; margin:0;">Copy</button>
+  </div>
+  <div id="connection-status" style="font-weight:bold; color:var(--nyt-black); margin-bottom:20px;">Waiting for opponent...</div>
+  <button id="lobby-back-btn" class="pill-btn secondary-btn">Cancel</button>
+</div>
+
+<div id="themes-screen" class="screen hidden">
+  <h2>Select Theme</h2>
+  <div class="mode-options">
+    <button class="select-btn theme-btn selected" onclick="setTheme('light')" id="btn-theme-light">Light Mode</button>
+    <button class="select-btn theme-btn" onclick="setTheme('dark')" id="btn-theme-dark">Dark Mode</button>
+    <button class="select-btn theme-btn" onclick="setTheme('newspaper')" id="btn-theme-newspaper">Newspaper</button>
+    <button class="select-btn theme-btn" onclick="setTheme('stranger')" id="btn-theme-stranger">Stranger Things</button>
+    <button class="select-btn theme-btn" onclick="setTheme('showgirl')" id="btn-theme-showgirl">The Life of a Showgirl</button>
+    <button class="select-btn theme-btn" onclick="setTheme('rainbow')" id="btn-theme-rainbow">Rainbow</button>
+  </div>
+  <button id="themes-back-btn" class="pill-btn secondary-btn" style="margin-top:30px;">Back</button>
+</div>
+
+<div id="settings-screen" class="screen hidden">
+  <h2>Game Settings</h2>
+  <div class="settings-group">
+    <span class="settings-label">Play As</span>
+    <div class="option-row">
+      <button class="select-btn side-btn selected" onclick="selectSide('X')" id="btn-side-x">X (First)</button>
+      <button class="select-btn side-btn" onclick="selectSide('O')" id="btn-side-o">O (Second)</button>
+    </div>
+  </div>
+  <div class="settings-group">
+    <span class="settings-label">Difficulty</span>
+    <div class="option-row">
+      <button class="select-btn diff-btn selected" onclick="selectDifficulty('easy')" id="btn-diff-easy">Easy</button>
+      <button class="select-btn diff-btn" onclick="selectDifficulty('medium')" id="btn-diff-medium">Medium</button>
+      <button class="select-btn diff-btn" onclick="selectDifficulty('hard')" id="btn-diff-hard">Hard</button>
+      <button class="select-btn diff-btn" onclick="selectDifficulty('expert')" id="btn-diff-expert">Stephanie The Expert</button>
+    </div>
+  </div>
+  <button id="start-game-btn" class="pill-btn">Start Game</button>
+  <button id="settings-back-btn" class="pill-btn secondary-btn" style="margin-top:10px;">Back</button>
+</div>
+
+<div id="confirm-modal" class="modal-overlay">
+  <h2 id="confirm-title" style="font-family:var(--font-title); font-size:2.5rem; margin-bottom:15px; color:var(--nyt-black);">Clear Board?</h2>
+  <p id="confirm-desc" style="color:var(--text-subtle); margin-bottom:30px;">This will wipe your current progress.</p>
+  <div style="display:flex; gap:15px;">
+    <button id="confirm-yes-btn" class="pill-btn" style="background:#d93a3a; color:white; min-width:120px;">Yes</button>
+    <button id="confirm-no-btn" class="pill-btn secondary-btn" style="min-width:120px;">Cancel</button>
+  </div>
+</div>
+
+<div id="disconnect-modal" class="modal-overlay">
+  <h2 style="font-family:var(--font-title); font-size:2.5rem; margin-bottom:15px; color:var(--nyt-black);">Disconnected.</h2>
+  <p style="color:var(--text-subtle); margin-bottom:30px;">Make sure both players keep the game tab open.</p>
+  <div style="display:flex; gap:15px;">
+    <button id="disconnect-new-btn" class="pill-btn">New Link</button>
+    <button id="disconnect-menu-btn" class="pill-btn secondary-btn">Main Menu</button>
+  </div>
+</div>
+
+<div id="ingame-theme-modal" class="modal-overlay">
+  <div class="label-text" style="font-size: 1.2rem; margin-bottom: 25px;">Choose Theme</div>
+  <div class="theme-grid">
+    <button class="select-btn theme-btn-ingame" onclick="setTheme('light')" id="ig-theme-light">Light</button>
+    <button class="select-btn theme-btn-ingame" onclick="setTheme('dark')" id="ig-theme-dark">Dark</button>
+    <button class="select-btn theme-btn-ingame" onclick="setTheme('newspaper')" id="ig-theme-newspaper">Newspaper</button>
+    <button class="select-btn theme-btn-ingame" onclick="setTheme('stranger')" id="ig-theme-stranger">Stranger Things</button>
+    <button class="select-btn theme-btn-ingame" onclick="setTheme('showgirl')" id="ig-theme-showgirl">The Life of a Showgirl</button>
+    <button class="select-btn theme-btn-ingame" onclick="setTheme('rainbow')" id="ig-theme-rainbow">Rainbow</button>
+  </div>
+  <button id="close-theme-modal" class="pill-btn secondary-btn" style="min-width: 150px;">Close</button>
+</div>
+
+<div id="win-screen" class="modal-overlay">
+  <div class="label-text">Winner</div>
+  <div id="win-title">X Wins!</div>
+  <div style="display:flex; gap: 20px;">
+    <button id="play-again-btn" class="pill-btn">Play Again</button>
+    <button id="view-board-btn" class="pill-btn secondary-btn">View Board</button>
+  </div>
+</div>
+
+<div id="game-wrapper">
+  
+  <div id="chat-sidebar">
+    <div id="chat-header-bar">
+      <div class="label-text" style="margin:0;">Chat</div>
+    </div>
+    <div id="chat-messages-area"></div>
+    <div id="chat-input-bar">
+      <input type="text" id="chat-input" placeholder="Type..." maxlength="50">
+      <button id="chat-send">Send</button>
+    </div>
+  </div>
+
+  <div id="board-container">
+    <div id="pause-screen" class="board-overlay">
+      <div class="big-pause-icon"></div>
+      <div class="label-text">Game Paused</div>
+      <div id="paused-time">00:00</div>
+      <button id="resume-btn" class="pill-btn" style="margin-top: 30px;">Resume</button>
+    </div>
+
+    <div id="col-labels" class="label-strip"></div>
+    <div id="row-labels" class="label-strip"></div>
+    <div id="board"></div>
+  </div>
+  
+  <div id="sidebar">
+    <div id="turn-display-container" class="turn-x">
+      <div class="label-text">Current Turn</div>
+      <div id="big-mark">X</div>
+    </div>
+
+    <div id="timer-container">
+      <div class="label-text">Timer</div>
+      <div class="timer-row">
+        <div id="timer-display">00:00</div>
+        <button id="pause-btn" class="control-btn" title="Pause"></button>
+      </div>
+    </div>
+
+    <div id="log-wrapper">
+      <div class="label-text" style="text-align: left; border-bottom: 1px solid var(--line-thin); padding-bottom: 5px;">Move History</div>
+      <div id="activity-log"></div>
+    </div>
+
+    <div id="sidebar-actions">
+      <div id="bottom-controls">
+        <button id="sound-btn" class="control-btn" title="Toggle Sound">🔊</button>
+        <button id="theme-open-btn" class="control-btn" title="Change Theme" style="font-size:1rem;">🎨</button>
+      </div>
+      <button id="menu-btn" class="action-btn">Main Menu</button>
+      <button id="clear-btn" class="action-btn danger-btn">Clear Board</button>
+    </div>
+  </div>
+
+</div>
+
+<script>
+/* --- DOM ELEMENTS --- */
+const startScreen = document.getElementById("start-screen");
+const modeScreen = document.getElementById("mode-screen");
+const settingsScreen = document.getElementById("settings-screen");
+const themesScreen = document.getElementById("themes-screen");
+const friendSelectScreen = document.getElementById("friend-select-screen");
+const nameInputScreen = document.getElementById("name-input-screen");
+const sideSelectScreen = document.getElementById("side-select-screen");
+const onlineLobbyScreen = document.getElementById("online-lobby-screen");
+const winScreen = document.getElementById("win-screen");
+const pauseScreen = document.getElementById("pause-screen");
+const confirmModal = document.getElementById("confirm-modal");
+const disconnectModal = document.getElementById("disconnect-modal");
+const ingameThemeModal = document.getElementById("ingame-theme-modal"); 
+const gameWrapper = document.getElementById("game-wrapper");
+const board = document.getElementById("board");
+const colLabels = document.getElementById("col-labels");
+const rowLabels = document.getElementById("row-labels");
+
+const mainPlayBtn = document.getElementById("main-play-btn");
+const friendModeBtn = document.getElementById("friend-mode-btn");
+const computerModeBtn = document.getElementById("computer-mode-btn");
+const themesMenuBtn = document.getElementById("themes-menu-btn");
+const themesBackBtn = document.getElementById("themes-back-btn");
+const startGameBtn = document.getElementById("start-game-btn");
+const settingsBackBtn = document.getElementById("settings-back-btn");
+const playAgainBtn = document.getElementById("play-again-btn");
+const viewBoardBtn = document.getElementById("view-board-btn");
+const pauseBtn = document.getElementById("pause-btn");
+const resumeBtn = document.getElementById("resume-btn");
+const soundBtn = document.getElementById("sound-btn"); 
+const themeOpenBtn = document.getElementById("theme-open-btn"); 
+const closeThemeModalBtn = document.getElementById("close-theme-modal"); 
+
+const menuBtn = document.getElementById("menu-btn");
+const clearBtn = document.getElementById("clear-btn");
+const confirmYesBtn = document.getElementById("confirm-yes-btn");
+const confirmNoBtn = document.getElementById("confirm-no-btn");
+const confirmTitle = document.getElementById("confirm-title");
+const confirmDesc = document.getElementById("confirm-desc");
+
+const turnContainer = document.getElementById("turn-display-container");
+const bigMark = document.getElementById("big-mark");
+const winTitle = document.getElementById("win-title");
+const activityLog = document.getElementById("activity-log");
+const timerDisplay = document.getElementById("timer-display");
+const pausedTimeDisplay = document.getElementById("paused-time");
+
+/* Friend Screen Elements */
+const localFriendBtnElem = document.getElementById("local-friend-btn");
+const onlineFriendBtnElem = document.getElementById("online-friend-btn");
+const friendBackBtn = document.getElementById("friend-back-btn");
+const lobbyBackBtn = document.getElementById("lobby-back-btn");
+const inviteLinkInput = document.getElementById("invite-link");
+const copyLinkBtn = document.getElementById("copy-link-btn");
+const connectionStatus = document.getElementById("connection-status");
+
+/* Name & Side Elements */
+const playerNameInput = document.getElementById("player-name-input");
+const confirmNameBtn = document.getElementById("confirm-name-btn");
+const nameBackBtn = document.getElementById("name-back-btn");
+const hostPickX = document.getElementById("host-pick-x");
+const hostPickO = document.getElementById("host-pick-o");
+const sideBackBtn = document.getElementById("side-back-btn");
+
+/* Disconnect Elements */
+const disconnectNewBtn = document.getElementById("disconnect-new-btn");
+const disconnectMenuBtn = document.getElementById("disconnect-menu-btn");
+
+/* Chat Elements */
+const chatSidebar = document.getElementById("chat-sidebar");
+const chatMessagesArea = document.getElementById("chat-messages-area");
+const chatInput = document.getElementById("chat-input");
+const chatSendBtn = document.getElementById("chat-send");
+
+/* --- STATE --- */
+let turn = "X";
+let nextMoveConstraint = null; 
+let isGameOver = false;
+let isVsComputer = false;
+let isPaused = false;
+let isMuted = false; 
+let currentTheme = 'light';
+const cells = [];
+let middleGridState = new Array(81).fill(null);
+let bigGridState = new Array(9).fill(null);
+let moveHistoryData = []; 
+
+let playerSide = "X";
+let computerDifficulty = "easy";
+let timerInterval = null;
+let secondsElapsed = 0;
+let pendingConfirmAction = null; 
+
+/* NETWORKING STATE */
+let isOnline = false;
+let peer = null;
+let conn = null;
+let myNetworkSide = null; // 'X' or 'O' if online
+let myName = "Player 1";
+let opponentName = "Player 2";
+let isHost = false; 
+
+const SAVE_KEY = 'tictactoe3_save';
+
+const THEME_NAMES = {
+  'light': 'Light Mode',
+  'dark': 'Dark Mode',
+  'newspaper': 'Newspaper',
+  'stranger': 'Stranger Things',
+  'showgirl': 'The Life of a Showgirl',
+  'rainbow': 'Rainbow'
+};
+
+/* --- SOUND ENGINE --- */
+const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+
+function playSound(type) {
+  if (isMuted) return;
+  if (audioCtx.state === 'suspended') audioCtx.resume();
+
+  const oscillator = audioCtx.createOscillator();
+  const gainNode = audioCtx.createGain();
+
+  oscillator.connect(gainNode);
+  gainNode.connect(audioCtx.destination);
+
+  if (type === 'X') {
+    oscillator.type = 'sine';
+    oscillator.frequency.setValueAtTime(600, audioCtx.currentTime);
+    oscillator.frequency.exponentialRampToValueAtTime(100, audioCtx.currentTime + 0.15);
+    gainNode.gain.setValueAtTime(0.1, audioCtx.currentTime);
+    gainNode.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.1);
+    oscillator.start();
+    oscillator.stop(audioCtx.currentTime + 0.15);
+  } else {
+    oscillator.type = 'sine';
+    oscillator.frequency.setValueAtTime(800, audioCtx.currentTime);
+    oscillator.frequency.exponentialRampToValueAtTime(1200, audioCtx.currentTime + 0.1);
+    gainNode.gain.setValueAtTime(0.08, audioCtx.currentTime);
+    gainNode.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.1);
+    oscillator.start();
+    oscillator.stop(audioCtx.currentTime + 0.1);
+  }
+}
+
+function playButtonSound() {
+  if (isMuted) return;
+  if (audioCtx.state === 'suspended') audioCtx.resume();
+  
+  const osc = audioCtx.createOscillator();
+  const gain = audioCtx.createGain();
+  
+  osc.connect(gain);
+  gain.connect(audioCtx.destination);
+  
+  osc.type = 'sine';
+  osc.frequency.setValueAtTime(330, audioCtx.currentTime); 
+  gain.gain.setValueAtTime(0.1, audioCtx.currentTime);
+  gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.1);
+  
+  osc.start();
+  osc.stop(audioCtx.currentTime + 0.1);
+}
+
+function playWinHum() {
+  if (isMuted) return;
+  if (audioCtx.state === 'suspended') audioCtx.resume();
+
+  const frequencies = [523.25, 659.25, 783.99]; 
+  frequencies.forEach(freq => {
+    const osc = audioCtx.createOscillator();
+    const gain = audioCtx.createGain();
+    osc.type = 'sine';
+    osc.frequency.value = freq;
+    osc.connect(gain);
+    gain.connect(audioCtx.destination);
+    
+    const now = audioCtx.currentTime;
+    gain.gain.setValueAtTime(0, now);
+    gain.gain.linearRampToValueAtTime(0.05, now + 0.1); 
+    gain.gain.exponentialRampToValueAtTime(0.001, now + 1.5); 
+    
+    osc.start(now);
+    osc.stop(now + 1.5);
+  });
+}
+
+soundBtn.addEventListener("click", () => {
+  isMuted = !isMuted;
+  if (isMuted) {
+    soundBtn.textContent = "🔇";
+  } else {
+    soundBtn.textContent = "🔊";
+  }
+  saveGame(); 
+});
+
+/* THEME MODAL LOGIC */
+themeOpenBtn.addEventListener("click", () => {
+  if(!isGameOver && !isPaused) stopTimer(); 
+  ingameThemeModal.classList.add("active");
+  document.querySelectorAll('.theme-btn-ingame').forEach(btn => btn.classList.remove('selected'));
+  const btn = document.getElementById('ig-theme-'+currentTheme);
+  if(btn) btn.classList.add('selected');
+});
+
+closeThemeModalBtn.addEventListener("click", () => {
+  ingameThemeModal.classList.remove("active");
+  if(!isGameOver && !isPaused) startTimer(true); 
+});
+
+document.querySelectorAll('button').forEach(btn => {
+  if(btn.id !== 'sound-btn') {
+    btn.addEventListener('click', playButtonSound);
+  }
+});
+
+/* --- INIT --- */
+window.addEventListener('load', () => {
+  // Check for invite link
+  const urlParams = new URLSearchParams(window.location.search);
+  const gameId = urlParams.get('game');
+
+  if (gameId) {
+    // JOIN AS GUEST
+    startScreen.classList.add("hidden");
+    isHost = false;
+    nameInputScreen.classList.remove("hidden");
+    window.targetGameId = gameId;
+  } else {
+    // Normal load
+    const savedData = localStorage.getItem(SAVE_KEY);
+    if (savedData) {
+      loadGameState(JSON.parse(savedData));
+    }
+  }
+});
+
+/* --- NAME SCREEN LOGIC --- */
+confirmNameBtn.addEventListener("click", () => {
+  const inputName = playerNameInput.value.trim();
+  if (inputName) {
+    myName = inputName;
+    nameInputScreen.classList.add("hidden");
+    if (isHost) {
+      // Go to Side Select
+      sideSelectScreen.classList.remove("hidden");
+    } else {
+      // Connect as Guest
+      initializePeer(window.targetGameId);
+    }
+  } else {
+    alert("Please enter a name.");
+  }
+});
+
+nameBackBtn.addEventListener("click", () => {
+  nameInputScreen.classList.add("hidden");
+  if (isHost) {
+    friendSelectScreen.classList.remove("hidden");
+  } else {
+    startScreen.classList.remove("hidden");
+  }
+});
+
+/* --- SIDE SELECT LOGIC (HOST) --- */
+hostPickX.addEventListener("click", () => {
+  playerSide = 'X';
+  sideSelectScreen.classList.add("hidden");
+  onlineLobbyScreen.classList.remove("hidden");
+  initializePeer();
+});
+
+hostPickO.addEventListener("click", () => {
+  playerSide = 'O';
+  sideSelectScreen.classList.add("hidden");
+  onlineLobbyScreen.classList.remove("hidden");
+  initializePeer();
+});
+
+sideBackBtn.addEventListener("click", () => {
+  sideSelectScreen.classList.add("hidden");
+  nameInputScreen.classList.remove("hidden");
+});
+
+/* --- PEERJS LOGIC --- */
+function initializePeer(targetId = null) {
+  peer = new Peer();
+  
+  peer.on('open', (id) => {
+    console.log('My peer ID is: ' + id);
+    if (!targetId) {
+      // HOST MODE
+      const link = `${window.location.origin}${window.location.pathname}?game=${id}`;
+      inviteLinkInput.value = link;
+      isOnline = true;
+      myNetworkSide = playerSide; // Set from Side Select
+      
+      peer.on('connection', (c) => {
+        setupConnection(c);
+        connectionStatus.textContent = "Friend Connected! Sending Game Data...";
+        connectionStatus.style.color = "green";
+        
+        // Host sends init data: My Name, My Side, Current Theme
+        setTimeout(() => {
+            c.send({ 
+              type: 'init', 
+              name: myName, 
+              hostSide: myNetworkSide,
+              theme: currentTheme
+            });
+        }, 500);
+      });
+    } else {
+      // GUEST MODE
+      isOnline = true;
+      const c = peer.connect(targetId);
+      setupConnection(c);
+      c.on('open', () => {
+        console.log("Connected to Host");
+        // Wait for 'init' message from Host
+      });
+    }
+  });
+}
+
+function setupConnection(c) {
+  conn = c;
+  
+  conn.on('data', (data) => {
+    handleNetworkData(data);
+  });
+  
+  conn.on('close', () => {
+    isOnline = false;
+    disconnectModal.classList.add("active");
+  });
+}
+
+function handleNetworkData(data) {
+  if (data.type === 'init') {
+    // Guest receives init data
+    opponentName = data.name;
+    setTheme(data.theme, false);
+    // If Host is X, Guest is O. If Host is O, Guest is X.
+    myNetworkSide = (data.hostSide === 'X') ? 'O' : 'X';
+    playerSide = myNetworkSide; // Update local logic reference
+    
+    // Send my name back
+    sendData({ type: 'name', name: myName });
+    
+    // Start Game
+    modeScreen.classList.add("hidden"); 
+    launchGame();
+    addChatMessage(`Connected to ${opponentName}`, 'system');
+
+  } else if (data.type === 'name') {
+    // Host receives Guest name
+    opponentName = data.name;
+    onlineLobbyScreen.classList.add("hidden");
+    launchGame();
+    addChatMessage(`${opponentName} connected!`, 'system');
+
+  } else if (data.type === 'move') {
+    const cell = cells.find(c => parseInt(c.dataset.row) === data.row && parseInt(c.dataset.col) === data.col);
+    if (cell) executeMove(cell, data.row, data.col, false); 
+  } else if (data.type === 'chat') {
+    // Determine side for color
+    const msgSide = (myNetworkSide === 'X') ? 'O' : 'X';
+    addChatMessage(data.msg, 'theirs', opponentName, msgSide);
+  } else if (data.type === 'reset') {
+    resetGame(false, false); 
+  } else if (data.type === 'theme') {
+    setTheme(data.theme, false);
+    const niceName = THEME_NAMES[data.theme] || data.theme;
+    addChatMessage(`${data.name} changed the theme to ${niceName}`, 'system');
+  } else if (data.type === 'pauseState') {
+    setPauseState(data.isPaused);
+    const action = data.isPaused ? 'paused' : 'resumed';
+    addChatMessage(`${data.name} ${action} the game`, 'system');
+  }
+}
+
+function sendData(data) {
+  if (isOnline && conn && conn.open) {
+    conn.send(data);
+  }
+}
+
+/* --- DISCONNECT HANDLING --- */
+disconnectNewBtn.addEventListener("click", () => {
+  disconnectModal.classList.remove("active");
+  // Clean restart
+  if (peer) { peer.destroy(); peer = null; isOnline = false; }
+  gameWrapper.style.opacity = "0";
+  onlineLobbyScreen.classList.add("hidden"); // Ensure lobby hidden
+  // Go to host setup
+  friendSelectScreen.classList.add("hidden");
+  nameInputScreen.classList.remove("hidden");
+  isHost = true; // Assume wanting to host again
+});
+
+disconnectMenuBtn.addEventListener("click", () => {
+  disconnectModal.classList.remove("active");
+  resetGame(true);
+});
+
+/* --- THEME LOGIC --- */
+function setTheme(theme, propagate = true) {
+  currentTheme = theme;
+  document.body.classList.remove('dark-theme', 'newspaper-theme', 'stranger-theme', 'showgirl-theme', 'rainbow-theme');
+  if (theme !== 'light') document.body.classList.add(theme + '-theme');
+  
+  document.querySelectorAll('.theme-btn').forEach(btn => btn.classList.remove('selected'));
+  const themeBtn = document.getElementById(`btn-theme-${theme}`);
+  if(themeBtn) themeBtn.classList.add('selected');
+  
+  document.querySelectorAll('.theme-btn-ingame').forEach(btn => btn.classList.remove('selected'));
+  const igBtn = document.getElementById(`ig-theme-${theme}`);
+  if(igBtn) igBtn.classList.add('selected');
+
+  if (ingameThemeModal.classList.contains("active")) {
+    ingameThemeModal.classList.remove("active");
+    if(!isGameOver && !isPaused) startTimer(true); 
+  }
+
+  if (propagate && isOnline) {
+    sendData({ type: 'theme', theme: theme, name: myName });
+    const niceName = THEME_NAMES[theme] || theme;
+    addChatMessage(`You changed the theme to ${niceName}`, 'system');
+  }
+
+  saveGame();
+}
+
+/* --- NAVIGATION --- */
+mainPlayBtn.addEventListener("click", () => {
+  startScreen.classList.add("hidden");
+  modeScreen.classList.remove("hidden");
+  if (audioCtx.state === 'suspended') audioCtx.resume();
+});
+
+themesMenuBtn.addEventListener("click", () => {
+  modeScreen.classList.add("hidden");
+  themesScreen.classList.remove("hidden");
+});
+
+themesBackBtn.addEventListener("click", () => {
+  themesScreen.classList.add("hidden");
+  modeScreen.classList.remove("hidden");
+});
+
+friendModeBtn.addEventListener("click", () => {
+  modeScreen.classList.add("hidden");
+  friendSelectScreen.classList.remove("hidden");
+});
+
+/* MULTIPLAYER SUBMENU */
+localFriendBtnElem.addEventListener("click", () => {
+  isVsComputer = false;
+  isOnline = false;
+  friendSelectScreen.classList.add("hidden");
+  launchGame();
+});
+
+onlineFriendBtnElem.addEventListener("click", () => {
+  friendSelectScreen.classList.add("hidden");
+  isHost = true;
+  nameInputScreen.classList.remove("hidden");
+});
+
+document.getElementById("friend-back-btn").addEventListener("click", () => {
+  friendSelectScreen.classList.add("hidden");
+  modeScreen.classList.remove("hidden");
+});
+
+document.getElementById("lobby-back-btn").addEventListener("click", () => {
+  onlineLobbyScreen.classList.add("hidden");
+  modeScreen.classList.remove("hidden");
+  if (peer) { peer.destroy(); peer = null; isOnline = false; }
+});
+
+copyLinkBtn.addEventListener("click", () => {
+  // Use modern clipboard API if available, fallback to select/execCommand
+  if (navigator.clipboard && navigator.clipboard.writeText) {
+    navigator.clipboard.writeText(inviteLinkInput.value).then(() => {
+      copyLinkBtn.textContent = "Copied!";
+      setTimeout(() => copyLinkBtn.textContent = "Copy", 2000);
+    }).catch(err => {
+      // Fallback
+      inviteLinkInput.select();
+      document.execCommand("copy");
+      copyLinkBtn.textContent = "Copied!";
+      setTimeout(() => copyLinkBtn.textContent = "Copy", 2000);
+    });
+  } else {
+    inviteLinkInput.select();
+    document.execCommand("copy");
+    copyLinkBtn.textContent = "Copied!";
+    setTimeout(() => copyLinkBtn.textContent = "Copy", 2000);
+  }
+});
+
+computerModeBtn.addEventListener("click", () => {
+  isVsComputer = true;
+  isOnline = false;
+  modeScreen.classList.add("hidden");
+  settingsScreen.classList.remove("hidden");
+});
+
+settingsBackBtn.addEventListener("click", () => {
+  settingsScreen.classList.add("hidden");
+  modeScreen.classList.remove("hidden");
+});
+
+function selectSide(side) {
+  playerSide = side;
+  document.querySelectorAll('.side-btn').forEach(btn => btn.classList.remove('selected'));
+  document.getElementById(`btn-side-${side.toLowerCase()}`).classList.add('selected');
+}
+
+function selectDifficulty(diff) {
+  computerDifficulty = diff;
+  document.querySelectorAll('.diff-btn').forEach(btn => btn.classList.remove('selected'));
+  document.getElementById(`btn-diff-${diff}`).classList.add('selected');
+}
+
+startGameBtn.addEventListener("click", () => {
+  settingsScreen.classList.add("hidden");
+  launchGame();
+});
+
+function launchGame() {
+  if (isOnline) {
+    chatSidebar.style.display = 'flex';
+  } else {
+    chatSidebar.style.display = 'none';
+  }
+
+  startTimer();
+  setTimeout(() => {
+    gameWrapper.style.opacity = "1";
+    if (isVsComputer && playerSide === "O") {
+        setTimeout(makeComputerMove, 800);
+    }
+    updateBoardVisuals(); 
+    saveGame();
+  }, 200);
+}
+
+/* MODIFIED MENU & CLEAR LOGIC */
+menuBtn.addEventListener("click", () => {
+  if(!isGameOver && !isPaused) togglePause(false, true); 
+  pendingConfirmAction = 'menu';
+  confirmTitle.textContent = "Exit to Menu?";
+  confirmDesc.textContent = "This will clear your current board and progress.";
+  confirmYesBtn.textContent = "Exit Game";
+  confirmModal.classList.add("active");
+});
+
+clearBtn.addEventListener("click", () => {
+  if(!isGameOver && !isPaused) togglePause(false, true); 
+  pendingConfirmAction = 'clear';
+  confirmTitle.textContent = "Clear Board?";
+  confirmDesc.textContent = "This will wipe your current progress.";
+  confirmYesBtn.textContent = "Yes, Clear";
+  confirmModal.classList.add("active");
+});
+
+confirmNoBtn.addEventListener("click", () => {
+  confirmModal.classList.remove("active");
+  if(!isGameOver && isPaused && gameWrapper.style.opacity === "1") togglePause(false, true); 
+});
+
+confirmYesBtn.addEventListener("click", () => {
+  confirmModal.classList.remove("active");
+  if (pendingConfirmAction === 'menu') {
+    resetGame(true); 
+  } else {
+    resetGame(false, true); // Propagate clear
+  }
+});
+
+playAgainBtn.addEventListener("click", () => resetGame(false, true));
+viewBoardBtn.addEventListener("click", () => {
+  winScreen.classList.remove("active");
+  stopTimer();
+});
+
+pauseBtn.addEventListener("click", () => togglePause(false, true)); 
+resumeBtn.addEventListener("click", () => togglePause(false, true));
+
+function togglePause(fromNetwork = false, propagate = false) {
+  if (isGameOver) return;
+  setPauseState(!isPaused);
+  if (propagate && isOnline) {
+    sendData({ type: 'pauseState', isPaused: isPaused, name: myName });
+    const action = isPaused ? 'paused' : 'resumed';
+    addChatMessage(`You ${action} the game`, 'system');
+  }
+}
+
+function setPauseState(paused) {
+  isPaused = paused;
+  if (isPaused) {
+    stopTimer();
+    pausedTimeDisplay.textContent = timerDisplay.textContent;
+    pauseScreen.classList.add("active");
+  } else {
+    startTimer(true);
+    pauseScreen.classList.remove("active");
+  }
+}
+
+/* CHAT LOGIC */
+chatSendBtn.addEventListener("click", sendChatMessage);
+chatInput.addEventListener("keypress", (e) => { if(e.key === 'Enter') sendChatMessage(); });
+
+function sendChatMessage() {
+  const text = chatInput.value.trim();
+  if (text) {
+    addChatMessage(text, 'mine', myName, myNetworkSide);
+    sendData({ type: 'chat', msg: text });
+    chatInput.value = "";
+  }
+}
+
+function addChatMessage(text, type, senderName, side = null) {
+  const div = document.createElement("div");
+  // If system, just 'chat-msg system'. If player, add 'mine'/'theirs' AND 'msg-x'/'msg-o'
+  let sideClass = '';
+  if (side === 'X') sideClass = 'msg-x';
+  if (side === 'O') sideClass = 'msg-o';
+  
+  div.className = `chat-msg ${type} ${sideClass}`;
+  
+  if (type === 'system') {
+    div.textContent = text;
+  } else {
+    const nameSpan = document.createElement("div");
+    nameSpan.className = "chat-name";
+    nameSpan.textContent = senderName;
+    
+    const msgSpan = document.createElement("span");
+    msgSpan.textContent = text;
+    
+    div.appendChild(nameSpan);
+    div.appendChild(msgSpan);
+  }
+  
+  chatMessagesArea.appendChild(div);
+  chatMessagesArea.scrollTop = chatMessagesArea.scrollHeight;
+}
+
+function startTimer(resuming = false) {
+  if (!resuming) {
+    updateTimerDisplay();
+  }
+  if (timerInterval) clearInterval(timerInterval);
+  timerInterval = setInterval(() => {
+    secondsElapsed++;
+    updateTimerDisplay();
+    saveGame();
+  }, 1000);
+}
+
+function stopTimer() {
+  if (timerInterval) clearInterval(timerInterval);
+  timerInterval = null;
+}
+
+function updateTimerDisplay() {
+  const m = Math.floor(secondsElapsed / 60);
+  const s = secondsElapsed % 60;
+  timerDisplay.textContent = `${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
+}
+
+for (let i = 0; i < 27 * 27; i++) {
+  const cell = document.createElement("div");
+  cell.className = "cell legal-zone"; 
+  cell.dataset.index = i;
+  const row = Math.floor(i / 27);
+  const col = i % 27;
+  cell.dataset.row = row;
+  cell.dataset.col = col;
+
+  if ((col + 1) % 9 === 0) cell.classList.add("b-right-thick");
+  else if ((col + 1) % 3 === 0) cell.classList.add("b-right-med");
+  if ((row + 1) % 9 === 0) cell.classList.add("b-bottom-thick");
+  else if ((row + 1) % 3 === 0) cell.classList.add("b-bottom-med");
+
+  board.appendChild(cell);
+  cells.push(cell);
+  cell.addEventListener("click", () => handleMove(cell, row, col));
+}
+
+for (let i = 1; i <= 27; i++) {
+  const colNum = document.createElement("div"); colNum.textContent = i; colLabels.appendChild(colNum);
+  const rowNum = document.createElement("div"); rowNum.textContent = i; rowLabels.appendChild(rowNum);
+}
+
+function handleMove(cell, row, col) {
+  if (isGameOver || isPaused) return; 
+  if (isVsComputer && turn !== playerSide) return;
+  if (isOnline && turn !== myNetworkSide) return;
+
+  if (cell.textContent !== "") return;
+  if (!isMoveLegal(row, col)) return;
+
+  executeMove(cell, row, col, true);
+
+  if (isVsComputer && !isGameOver && turn !== playerSide) {
+    setTimeout(makeComputerMove, 600);
+  }
+}
+
+function executeMove(cell, row, col, broadcast = false) {
+  if (broadcast && isOnline) {
+    sendData({ type: 'move', row: row, col: col });
+  }
+
+  addLogEntry(turn, row, col);
+  playSound(turn);
+
+  cell.textContent = turn;
+  applyMarkStyles(cell);
+
+  let wonSomething = false;
+  if (checkMiddleGridWin(row, col)) {
+    wonSomething = true;
+    const mgRow = Math.floor(row / 3);
+    const mgCol = Math.floor(col / 3);
+    const bgRow = Math.floor(mgRow / 3);
+    const bgCol = Math.floor(mgCol / 3);
+    if (checkBigGridWin(bgRow, bgCol)) checkGlobalWin();
+  }
+
+  if (isGameOver) { 
+    stopTimer(); 
+    updateBoardVisuals(); 
+    saveGame();
+    return; 
+  }
+  
+  if (wonSomething) nextMoveConstraint = null; 
+  else calculateNextConstraint(row, col);
+
+  switchTurn();
+  updateBoardVisuals();
+  saveGame();
+}
+
+function makeComputerMove() {
+  if (isGameOver || isPaused) return;
+
+  const legalCells = cells.filter(cell => {
+    const r = parseInt(cell.dataset.row);
+    const c = parseInt(cell.dataset.col);
+    return cell.textContent === "" && isMoveLegal(r, c);
+  });
+
+  if (legalCells.length === 0) return;
+
+  let chosenCell = null;
+  const computerMark = (playerSide === "X") ? "O" : "X";
+  let smartMoveChance = 0; 
+  if (computerDifficulty === "easy") smartMoveChance = 0;
+  if (computerDifficulty === "medium") smartMoveChance = 0.5;
+  if (computerDifficulty === "hard") smartMoveChance = 0.9;
+  if (computerDifficulty === "expert") smartMoveChance = 1.0;
+
+  if (Math.random() < smartMoveChance) {
+    chosenCell = findBestMoveFor(legalCells, computerMark);
+    if (!chosenCell) chosenCell = findBestMoveFor(legalCells, playerSide);
+    if (!chosenCell && computerDifficulty === "expert") {
+       chosenCell = legalCells.find(cell => {
+         const r = parseInt(cell.dataset.row);
+         const c = parseInt(cell.dataset.col);
+         return (r % 3 === 1) && (c % 3 === 1);
+       });
+    }
+  }
+
+  if (!chosenCell) {
+    const randomIndex = Math.floor(Math.random() * legalCells.length);
+    chosenCell = legalCells[randomIndex];
+  }
+
+  const r = parseInt(chosenCell.dataset.row);
+  const c = parseInt(chosenCell.dataset.col);
+  executeMove(chosenCell, r, c);
+}
+
+function findBestMoveFor(legalMoves, markToCheck) {
+  for (let cell of legalMoves) {
+    const r = parseInt(cell.dataset.row);
+    const c = parseInt(cell.dataset.col);
+    if (simulatesLocalWin(r, c, markToCheck)) return cell;
+  }
+  return null;
+}
+
+function simulatesLocalWin(r, c, mark) {
+  const mgRow = Math.floor(r / 3);
+  const mgCol = Math.floor(c / 3);
+  const startR = mgRow * 3;
+  const startC = mgCol * 3;
+  let localGrid = [[null,null,null],[null,null,null],[null,null,null]];
+  for(let i=0; i<3; i++) {
+    for(let j=0; j<3; j++) {
+      const idx = (startR+i)*27 + (startC+j);
+      localGrid[i][j] = cells[idx].textContent;
+    }
+  }
+  localGrid[r%3][c%3] = mark;
+  for(let i=0; i<3; i++) if(localGrid[i][0]==mark && localGrid[i][1]==mark && localGrid[i][2]==mark) return true;
+  for(let i=0; i<3; i++) if(localGrid[0][i]==mark && localGrid[1][i]==mark && localGrid[2][i]==mark) return true;
+  if(localGrid[0][0]==mark && localGrid[1][1]==mark && localGrid[2][2]==mark) return true;
+  if(localGrid[0][2]==mark && localGrid[1][1]==mark && localGrid[2][0]==mark) return true;
+  return false;
+}
+
+function addLogEntry(player, r, c) {
+  moveHistoryData.unshift({ player, r, c });
+  renderLogEntry(player, r, c);
+}
+
+function renderLogEntry(player, r, c) {
+  const entry = document.createElement("div");
+  entry.className = "log-entry";
+  const x = c + 1;
+  const y = r + 1;
+  const markSpan = `<span class="log-mark ${player === 'X' ? 'log-x' : 'log-o'}">${player}</span>`;
+  entry.innerHTML = `${markSpan} placed at <strong>(${x}, ${y})</strong>`;
+  activityLog.insertBefore(entry, activityLog.firstChild);
+}
+
+function isMoveLegal(r, c) {
+  if (isGameOver) return false;
+  const mgRow = Math.floor(r / 3);
+  const mgCol = Math.floor(c / 3);
+  const mgIndex = mgRow * 9 + mgCol;
+  const bgRow = Math.floor(mgRow / 3);
+  const bgCol = Math.floor(mgCol / 3);
+  const bgIndex = bgRow * 3 + bgCol;
+
+  if (middleGridState[mgIndex] !== null) return false;
+  if (bigGridState[bgIndex] !== null) return false;
+
+  if (!nextMoveConstraint) return true;
+  const { r: rRange, c: cRange } = nextMoveConstraint;
+  return (r >= rRange[0] && r < rRange[1] && c >= cRange[0] && c < cRange[1]);
+}
+
+function checkMiddleGridWin(r, c) {
+  const mgRow = Math.floor(r / 3);
+  const mgCol = Math.floor(c / 3);
+  const mgIndex = mgRow * 9 + mgCol;
+  if (middleGridState[mgIndex] !== null) return false;
+  const startR = mgRow * 3;
+  const startC = mgCol * 3;
+  const getCell = (dr, dc) => cells[(startR + dr) * 27 + (startC + dc)].textContent;
+  const winner = checkGridLogic(getCell);
+  if (winner) {
+    middleGridState[mgIndex] = winner;
+    createOverlay(mgRow, mgCol, winner, "middle");
+    playWinHum();
+    return true;
+  }
+  return false;
+}
+
+function checkBigGridWin(bgRow, bgCol) {
+  const bgIndex = bgRow * 3 + bgCol;
+  if (bigGridState[bgIndex] !== null) return false;
+  const startMgRow = bgRow * 3;
+  const startMgCol = bgCol * 3;
+  const getMgOwner = (dr, dc) => middleGridState[(startMgRow + dr) * 9 + (startMgCol + dc)];
+  const winner = checkGridLogic(getMgOwner);
+  if (winner) {
+    bigGridState[bgIndex] = winner;
+    createOverlay(bgRow, bgCol, winner, "big");
+    playWinHum();
+    return true;
+  }
+  return false;
+}
+
+function checkGlobalWin() {
+  const getBgOwner = (dr, dc) => bigGridState[dr * 3 + dc];
+  const winner = checkGridLogic(getBgOwner);
+  if (winner) {
+    isGameOver = true;
+    winTitle.textContent = `${winner} Wins!`;
+    winTitle.className = winner === "X" ? "winner-X" : "winner-O";
+    winScreen.classList.add("active");
+  }
+}
+
+function checkGridLogic(accessorFn) {
+  const lines = [
+    [[0,0], [0,1], [0,2]], [[1,0], [1,1], [1,2]], [[2,0], [2,1], [2,2]], 
+    [[0,0], [1,0], [2,0]], [[0,1], [1,1], [2,1]], [[0,2], [1,2], [2,2]], 
+    [[0,0], [1,1], [2,2]], [[0,2], [1,1], [2,0]] 
+  ];
+  for (let line of lines) {
+    const v0 = accessorFn(line[0][0], line[0][1]);
+    const v1 = accessorFn(line[1][0], line[1][1]);
+    const v2 = accessorFn(line[2][0], line[2][1]);
+    if (v0 && v0 === v1 && v0 === v2) return v0;
+  }
+  return null;
+}
+
+function calculateNextConstraint(lastRow, lastCol) {
+  const middleGridRowVal = Math.floor((lastRow % 9) / 3);
+  const middleGridColVal = Math.floor((lastCol % 9) / 3);
+  const cellRowVal = lastRow % 3;
+  const cellColVal = lastCol % 3;
+  const targetBigRow = middleGridRowVal;
+  const targetBigCol = middleGridColVal;
+  const targetMidRow = cellRowVal;
+  const targetMidCol = cellColVal;
+  const startRow = (targetBigRow * 9) + (targetMidRow * 3);
+  const startCol = (targetBigCol * 9) + (targetMidCol * 3);
+  const targetMgRow = (targetBigRow * 3) + targetMidRow;
+  const targetMgCol = (targetBigCol * 3) + targetMidCol;
+  const targetMgIndex = targetMgRow * 9 + targetMgCol;
+  const targetBgIndex = targetBigRow * 3 + targetBigCol;
+
+  nextMoveConstraint = { r: [startRow, startRow + 3], c: [startCol, startCol + 3] };
+  if (middleGridState[targetMgIndex] !== null) { nextMoveConstraint = null; return; }
+  if (bigGridState[targetBgIndex] !== null) { nextMoveConstraint = null; return; }
+  if (isZoneFull(nextMoveConstraint)) { nextMoveConstraint = null; return; }
+}
+
+function isZoneFull(constraint) {
+  for (let r = constraint.r[0]; r < constraint.r[1]; r++) {
+    for (let c = constraint.c[0]; c < constraint.c[1]; c++) {
+      if (cells[r * 27 + c].textContent === "") return false;
+    }
+  }
+  return true;
+}
+
+function updateBoardVisuals() {
+  cells.forEach(cell => {
+    const r = parseInt(cell.dataset.row);
+    const c = parseInt(cell.dataset.col);
+    if (isGameOver || cell.textContent !== "") {
+      cell.className = "cell"; 
+      if(cell.textContent) applyMarkStyles(cell);
+      restoreBorders(cell, r, c);
+    } else if (isMoveLegal(r, c) && !isPaused) {
+      cell.className = "cell legal-zone";
+      restoreBorders(cell, r, c);
+    } else {
+      cell.className = "cell disabled-zone";
+      restoreBorders(cell, r, c);
+    }
+  });
+}
+
+function restoreBorders(cell, r, c) {
+  if ((c + 1) % 9 === 0) cell.classList.add("b-right-thick");
+  else if ((c + 1) % 3 === 0) cell.classList.add("b-right-med");
+  if ((r + 1) % 9 === 0) cell.classList.add("b-bottom-thick");
+  else if ((r + 1) % 3 === 0) cell.classList.add("b-bottom-med");
+}
+
+function switchTurn() {
+  turn = turn === "X" ? "O" : "X";
+  bigMark.textContent = turn;
+  turnContainer.className = turn === "X" ? "turn-x" : "turn-o";
+}
+
+function applyMarkStyles(cell) {
+  cell.classList.remove("x-mark", "o-mark");
+  if (cell.textContent === "X") cell.classList.add("x-mark");
+  if (cell.textContent === "O") cell.classList.add("o-mark");
+}
+
+function createOverlay(row, col, winner, type) {
+  const overlay = document.createElement("div");
+  overlay.className = `won-overlay winner-${winner}`;
+  overlay.textContent = winner;
+  if (type === "middle") {
+    overlay.classList.add("won-middle-grid");
+    const sizePct = 100 / 9; 
+    overlay.style.width = `${sizePct}%`; overlay.style.height = `${sizePct}%`;
+    overlay.style.top = `${row * sizePct}%`; overlay.style.left = `${col * sizePct}%`;
+  } else {
+    overlay.classList.add("won-big-grid");
+    const sizePct = 100 / 3; 
+    overlay.style.width = `${sizePct}%`; overlay.style.height = `${sizePct}%`;
+    overlay.style.top = `${row * sizePct}%`; overlay.style.left = `${col * sizePct}%`;
+  }
+  board.appendChild(overlay);
+}
+
+function saveGame() {
+  const cellData = cells.map(c => c.textContent);
+  const gameState = {
+    turn,
+    nextMoveConstraint,
+    isGameOver,
+    isVsComputer,
+    playerSide,
+    computerDifficulty,
+    middleGridState,
+    bigGridState,
+    secondsElapsed,
+    moveHistoryData,
+    cellData,
+    currentTheme,
+    isMuted
+  };
+  localStorage.setItem(SAVE_KEY, JSON.stringify(gameState));
+}
+
+function loadGameState(state) {
+  turn = state.turn;
+  nextMoveConstraint = state.nextMoveConstraint;
+  isGameOver = state.isGameOver;
+  isVsComputer = state.isVsComputer;
+  playerSide = state.playerSide || "X";
+  computerDifficulty = state.computerDifficulty || "easy";
+  middleGridState = state.middleGridState;
+  bigGridState = state.bigGridState;
+  secondsElapsed = state.secondsElapsed;
+  moveHistoryData = state.moveHistoryData || [];
+  isMuted = state.isMuted || false;
+  if(isMuted) soundBtn.textContent = "🔇";
+  
+  if (state.currentTheme) setTheme(state.currentTheme);
+
+  const cellData = state.cellData;
+  cells.forEach((cell, i) => {
+    cell.textContent = cellData[i];
+    applyMarkStyles(cell);
+  });
+
+  document.querySelectorAll(".won-overlay").forEach(o => o.remove()); 
+  for(let i=0; i<81; i++) {
+    if(middleGridState[i]) {
+      const r = Math.floor(i / 9);
+      const c = i % 9;
+      createOverlay(r, c, middleGridState[i], "middle");
+    }
+  }
+  for(let i=0; i<9; i++) {
+    if(bigGridState[i]) {
+      const r = Math.floor(i / 3);
+      const c = i % 3;
+      createOverlay(r, c, bigGridState[i], "big");
+    }
+  }
+
+  activityLog.innerHTML = "";
+  for(let i = moveHistoryData.length - 1; i >= 0; i--) {
+    const move = moveHistoryData[i];
+    renderLogEntry(move.player, move.r, move.c);
+  }
+
+  startScreen.classList.add("hidden");
+  gameWrapper.style.opacity = "1";
+  bigMark.textContent = turn;
+  turnContainer.className = turn === "X" ? "turn-x" : "turn-o";
+  updateTimerDisplay();
+  updateBoardVisuals();
+  
+  if(!isGameOver) startTimer(true);
+}
+
+function resetGame(returnToMenu = false, propagate = false) {
+  stopTimer(); 
+  localStorage.removeItem(SAVE_KEY); 
+  
+  turn = "X";
+  nextMoveConstraint = null;
+  isGameOver = false;
+  isPaused = false;
+  middleGridState.fill(null);
+  bigGridState.fill(null);
+  secondsElapsed = 0;
+  moveHistoryData = [];
+  
+  cells.forEach(cell => {
+    cell.textContent = "";
+    cell.className = "cell legal-zone";
+    const r = parseInt(cell.dataset.row);
+    const c = parseInt(cell.dataset.col);
+    restoreBorders(cell, r, c);
+  });
+  
+  document.querySelectorAll(".won-overlay").forEach(o => o.remove());
+  activityLog.innerHTML = "";
+  winScreen.classList.remove("active");
+  pauseScreen.classList.remove("active");
+  ingameThemeModal.classList.remove("active");
+  
+  bigMark.textContent = "X";
+  turnContainer.className = "turn-x";
+  updateTimerDisplay();
+
+  if (propagate && isOnline) {
+    sendData({ type: 'reset' });
+  }
+
+  if (returnToMenu) {
+    settingsScreen.classList.add("hidden"); 
+    modeScreen.classList.add("hidden");
+    friendSelectScreen.classList.add("hidden");
+    onlineLobbyScreen.classList.add("hidden");
+    sideSelectScreen.classList.add("hidden");
+    gameWrapper.style.opacity = "0";
+    if (peer) { peer.destroy(); peer = null; isOnline = false; }
+    setTimeout(() => {
+      startScreen.classList.remove("hidden");
+    }, 200);
+  } else {
+    updateBoardVisuals();
+    startTimer();
+  }
+}
+</script>
+
+</body>
+</html>
